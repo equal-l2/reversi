@@ -2,13 +2,50 @@
 
 let fieldWidth = 8;
 let fieldHeight = 8;
+
+class Board {
+  constructor(width, height) {
+    this._width = width;
+    this._height = height;
+    this.board = new Array(width)
+      .fill(null) // for map (undefined won't work)
+      .map(() => {
+        return new Array(height).fill(0)
+      });
+  }
+
+  mutate(row, col, value) {
+    this.board[row][col] = value;
+  }
+
+  read(row, col) {
+    return this.board[row][col];
+  }
+
+  width() {
+    return this._width;
+  }
+
+  height() {
+    return this._height;
+  }
+}
+
 let current = 1;
 
-const board = new Array(fieldHeight)
-                .fill(null) // for map (undefined won't work)
-                .map(() => {
-                  return new Array(fieldWidth).fill(0)
-                });
+function showCurrent() {
+  let bp = document.getElementById('black-player');
+  let wp = document.getElementById('white-player');
+  bp.classList.remove('placeable');
+  wp.classList.remove('placeable');
+  if (current == 1) {
+    bp.classList.add('placeable')
+  } else if (current === 2) {
+    wp.classList.add('placeable')
+  }
+}
+
+const board = new Board(fieldHeight, fieldWidth);
 
 function getStoneSvg(state) {
   let colorStr = 'red';
@@ -36,16 +73,64 @@ function populateField() {
   let field = document.getElementById('field');
   field.innerHTML = '';
 
-  for(let i = 0; i < fieldHeight; i++) {
+  for (let i = 0; i < fieldHeight; i++) {
     let row = field.insertRow();
-    for(let j = 0; j < fieldWidth; j++) {
+    for (let j = 0; j < fieldWidth; j++) {
       let cell = row.insertCell();
-      cell.innerHTML = getStoneSvg(board[i][j]);
-      cell.onclick = (_) => {
-        let rowIdx = cell.closest('tr').rowIndex;
-        let colIdx = cell.closest('td').cellIndex;
-        tryPlaceStone(rowIdx, colIdx);
+      cell.innerHTML = getStoneSvg(board.read(i, j));
+    }
+  }
+}
+
+function showEnd(show) {
+  let end = document.getElementById('end');
+  if (show) end.style.visibility = 'visible';
+  else end.style.visibility = 'hidden';
+}
+
+function nextTurn() {
+  current = flipped(current);
+  let ps = getPlaceable();
+  if (ps.length === 0) {
+    current = flipped(current);
+    ps = getPlaceable();
+    if (ps.length === 0) {
+      showEnd(true);
+      populateField();
+      return;
+    }
+  }
+
+  showCurrent();
+  populateField();
+  renderPlaceable(ps);
+}
+
+function getPlaceable() {
+  let ret = [];
+  for (let i = 0; i < fieldHeight; i++) {
+    for (let j = 0; j < fieldWidth; j++) {
+      let txt = canFlipStone(i, j, current);
+      if (txt !== "") {
+        ret.push([i, j, txt]);
       }
+    }
+  }
+  return ret;
+}
+
+function renderPlaceable(ps) {
+  let field = document.getElementById('field');
+  for (let p of ps) {
+    let [i, j, _] = p;
+    let cell = field.rows[i].cells[j];
+    cell.classList.add('placeable');
+    //cell.innerHTML = txt;
+    cell.onclick = (_) => {
+      let rowIdx = cell.closest('tr').rowIndex;
+      let colIdx = cell.closest('td').cellIndex;
+      placeStone(rowIdx, colIdx, current);
+      nextTurn();
     }
   }
 }
@@ -59,8 +144,8 @@ function canFlipUp(row, col, myStone) {
   let i = row - 1;
   let j = col;
   while (i > 1) {
-    if (board[i][j] === 0) break;
-    if (board[i][j] === oppo && board[i-1][j] === myStone) {
+    if (board.read(i, j) !== oppo) break;
+    if (board.read(i - 1, j) === myStone) {
       return true;
     }
     i--;
@@ -73,8 +158,8 @@ function canFlipDown(row, col, myStone) {
   let i = row + 1;
   let j = col;
   while (i < fieldHeight - 1) {
-    if (board[i][j] === 0) break;
-    if (board[i][j] === oppo && board[i+1][j] === myStone) {
+    if (board.read(i, j) !== oppo) break;
+    if (board.read(i + 1, j) === myStone) {
       return true;
     }
     i++;
@@ -87,8 +172,8 @@ function canFlipLeft(row, col, myStone) {
   let i = row;
   let j = col - 1;
   while (j > 1) {
-    if (board[i][j] === 0) break;
-    if (board[i][j] === oppo && board[i][j-1] === myStone) {
+    if (board.read(i, j) !== oppo) break;
+    if (board.read(i, j - 1) === myStone) {
       return true;
     }
     j--;
@@ -101,8 +186,8 @@ function canFlipRight(row, col, myStone) {
   let i = row;
   let j = col + 1;
   while (j < fieldHeight - 1) {
-    if (board[i][j] === 0) break;
-    if (board[i][j] === oppo && board[i][j+1] === myStone) {
+    if (board.read(i, j) !== oppo) break;
+    if (board.read(i, j + 1) === myStone) {
       return true;
     }
     j++;
@@ -115,8 +200,8 @@ function canFlipUpLeft(row, col, myStone) {
   let i = row - 1;
   let j = col - 1;
   while (i > 1 && j > 1) {
-    if (board[i][j] === 0) break;
-    if (board[i][j] === oppo && board[i-1][j-1] === myStone) {
+    if (board.read(i, j) !== oppo) break;
+    if (board.read(i - 1, j - 1) === myStone) {
       return true;
     }
     i--;
@@ -130,8 +215,8 @@ function canFlipUpRight(row, col, myStone) {
   let i = row - 1;
   let j = col + 1;
   while (i > 1 && j < fieldHeight - 1) {
-    if (board[i][j] === 0) break;
-    if (board[i][j] === oppo && board[i-1][j+1] === myStone) {
+    if (board.read(i, j) !== oppo) break;
+    if (board.read(i - 1, j + 1) === myStone) {
       return true;
     }
     i--;
@@ -145,8 +230,8 @@ function canFlipDownLeft(row, col, myStone) {
   let i = row + 1;
   let j = col - 1;
   while (i < fieldHeight - 1 && j > 1) {
-    if (board[i][j] === 0) break;
-    if (board[i][j] === oppo && board[i+1][j-1] === myStone) {
+    if (board.read(i, j) !== oppo) break;
+    if (board.read(i + 1, j - 1) === myStone) {
       return true;
     }
     i++;
@@ -160,8 +245,8 @@ function canFlipDownRight(row, col, myStone) {
   let i = row + 1;
   let j = col + 1;
   while (i < fieldHeight - 1 && j < fieldHeight - 1) {
-    if (board[i][j] === 0) break;
-    if (board[i][j] === oppo && board[i+1][j+1] === myStone) {
+    if (board.read(i, j) !== oppo) break;
+    if (board.read(i + 1, j + 1) === myStone) {
       return true;
     }
     i++;
@@ -171,53 +256,59 @@ function canFlipDownRight(row, col, myStone) {
 }
 
 function canFlipStone(row, col, myStone) {
-  return canFlipUp(row,col,myStone) ||
-    canFlipDown(row,col,myStone) ||
-    canFlipLeft(row,col,myStone) ||
-    canFlipRight(row,col,myStone) ||
-    canFlipUpLeft(row,col,myStone) ||
-    canFlipUpRight(row,col,myStone) ||
-    canFlipDownLeft(row,col,myStone) ||
-    canFlipDownRight(row,col,myStone);
+  if (board.read(row, col) !== 0) {
+    return "";
+  }
+
+  let ret = ""
+  if (canFlipUp(row, col, myStone)) {ret += "U";}
+  if (canFlipDown(row, col, myStone)) {ret += "D";}
+  if (canFlipLeft(row, col, myStone)) {ret += "L";}
+  if (canFlipRight(row, col, myStone)) {ret += "R";}
+  if (canFlipUpLeft(row, col, myStone)) {ret += "ul";}
+  if (canFlipUpRight(row, col, myStone)) {ret += "ur";}
+  if (canFlipDownLeft(row, col, myStone)) {ret += "dl";}
+  if (canFlipDownRight(row, col, myStone)) {ret += "dr";}
+  return ret;
 }
 
 function placeStone(row, col, myStone) {
   const oppo = flipped(myStone);
-  board[row][col] = myStone;
+  board.mutate(row, col, myStone)
 
   if (canFlipUp(row, col, current)) {
     let i = row - 1;
-    while(i > 0 && board[i][col] === oppo) {
-      board[i][col] = myStone;
+    while (i > 0 && board.read(i, col) === oppo) {
+      board.mutate(i, col, myStone)
       i--;
     }
   }
   if (canFlipDown(row, col, current)) {
     let i = row + 1;
-    while(i < fieldHeight && board[i][col] === oppo) {
-      board[i][col] = myStone;
+    while (i < fieldHeight && board.read(i, col) === oppo) {
+      board.mutate(i, col, myStone)
       i++;
     }
   }
   if (canFlipLeft(row, col, current)) {
     let j = col - 1;
-    while(j > 0 && board[row][j] === oppo) {
-      board[row][j] = myStone;
+    while (j > 0 && board.read(row, j) === oppo) {
+      board.mutate(row, j, myStone)
       j--;
     }
   }
   if (canFlipRight(row, col, current)) {
     let j = col + 1;
-    while(j < fieldWidth && board[row][j] === oppo) {
-      board[row][j] = myStone;
+    while (j < fieldWidth && board.read(row, j) === oppo) {
+      board.mutate(row, j, myStone)
       j++;
     }
   }
   if (canFlipUpLeft(row, col, current)) {
     let i = row - 1;
     let j = col - 1;
-    while(i > 0 && j > 0 && board[i][col] === oppo) {
-      board[i][col] = myStone;
+    while (i > 0 && j > 0 && board.read(i, j) === oppo) {
+      board.mutate(i, j, myStone)
       i--;
       j--;
     }
@@ -225,8 +316,8 @@ function placeStone(row, col, myStone) {
   if (canFlipUpRight(row, col, current)) {
     let i = row - 1;
     let j = col + 1;
-    while(i > 0 && j < fieldWidth && board[i][col] === oppo) {
-      board[i][col] = myStone;
+    while (i > 0 && j < fieldWidth && board.read(i, j) === oppo) {
+      board.mutate(i, j, myStone)
       i--;
       j++;
     }
@@ -234,8 +325,8 @@ function placeStone(row, col, myStone) {
   if (canFlipDownLeft(row, col, current)) {
     let i = row + 1;
     let j = col - 1;
-    while(i < fieldHeight && j > 0 && board[i][col] === oppo) {
-      board[i][col] = myStone;
+    while (i < fieldHeight && j > 0 && board.read(i, j) === oppo) {
+      board.mutate(i, j, myStone)
       i++;
       j--;
     }
@@ -243,37 +334,26 @@ function placeStone(row, col, myStone) {
   if (canFlipDownRight(row, col, current)) {
     let i = row + 1;
     let j = col + 1;
-    while(i < fieldHeight && j < fieldHeight && board[i][col] === oppo) {
-      board[i][col] = myStone;
+    while (i < fieldHeight && j < fieldHeight && board.read(i, j) === oppo) {
+      board.mutate(i, j, myStone)
       i++;
       j++;
     }
   }
 }
 
-function tryPlaceStone(row, col) {
-  if (board[row][col] !== 0) {
-    console.log("stone is already placed");
-    return;
-  }
-
-  if (!canFlipStone(row, col, current)) {
-    console.log("no stone will be flipped");
-    return;
-  }
-
-  placeStone(row, col, current);
-  current = flipped(current);
-  populateField();
-}
-
 function initBoard() {
-  board[fieldHeight/2-1][fieldWidth/2-1] = 1;
-  board[fieldHeight/2-1][fieldWidth/2] = 2;
-  board[fieldHeight/2][fieldWidth/2-1] = 2;
-  board[fieldHeight/2][fieldWidth/2] = 1;
+  let halfH = Math.trunc(fieldHeight / 2);
+  let halfW = Math.trunc(fieldWidth / 2);
+  board.mutate(halfH - 1, halfW - 1, 1)
+  board.mutate(halfH - 1, halfW, 2)
+  board.mutate(halfH, halfW - 1, 2)
+  board.mutate(halfH, halfW, 1)
 
+  showCurrent();
   populateField();
+  renderPlaceable(getPlaceable());
+  showEnd(false);
 }
 
 window.addEventListener('load', initBoard);

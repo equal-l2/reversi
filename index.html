@@ -6,7 +6,17 @@
         <link rel="stylesheet" href="./index.css">
     </head>
     <body>
-        <table id="field"></table>
+        <table id="field" class="center"></table>
+        <div class="center" style="display:flex;justify-content:center">
+            <svg class="stone" id="black-player" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="black" stroke-width="0.2em" fill="black">
+            </svg>
+
+            <svg class="stone" id="white-player" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="black" stroke-width="0.2em" fill="white">
+            </svg>
+        </div>
+        <p id="end" class="center">END!!!</p>
         <script src="./index.js"></script>
     </body>
 </html>
