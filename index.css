@@ -1,26 +1,57 @@
 body {
-    padding: 1em;
+  padding: 1em;
 }
 
 #field {
-    background-color: green;
-    border-collapse: collapse;
+  background-color: green;
+  border-collapse: collapse;
 }
 
 #field td {
-    border: 2px solid #222222;
+  border: 2px solid #222222;
 }
 
 .stone {
-    height: 3em;
-    width: 3em;
+  height: 3em;
+  width: 3em;
 }
 
 .placeable {
-    background-color: magenta;
+  background-color: magenta;
 }
 
 .center {
-    margin-left: auto;
-    margin-right: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.5em;
+}
+
+select {
+  appearance: menulist-button;
+  border: solid 1px;
+  border-radius: 5px;
+  background: lightgray;
+  padding: 0.2em;
+}
+
+button {
+  border: solid 1px;
+  border-radius: 5px;
+  background: lightgray;
+  padding: 0.2em;
+}
+
+#control * {
+  margin: 0.2em;
+}
+
+.vert {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+#status > * {
+  margin: 0.2em;
 }

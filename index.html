@@ -1,22 +1,42 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Reversi</title>
-        <link rel="stylesheet" href="./destyle.css">
-        <link rel="stylesheet" href="./index.css">
-    </head>
-    <body>
-        <table id="field" class="center"></table>
-        <div class="center" style="display:flex;justify-content:center">
-            <svg class="stone" id="black-player" viewBox="0 0 100 100">
+
+<head>
+    <title>Reversi</title>
+    <link rel="stylesheet" href="./destyle.css">
+    <link rel="stylesheet" href="./index.css">
+    <meta charset="utf-8">
+</head>
+
+<body>
+    <div id="control" class="center">
+        <select id="first"></select>
+        VS
+        <select id="second"></select>
+        <button onclick="newGame()">New Game</button>
+    </div>
+    <table id="field" style="margin-left:auto;margin-right:auto;"></table>
+    <div id="status" class="center">
+        <div id="black-info" class="vert">
+            <span id="black-player"></span>
+            <svg class="stone" id="black-stone" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" stroke="black" stroke-width="0.2em" fill="black">
             </svg>
+            <span id="black-count"></span>
+        </div>
 
-            <svg class="stone" id="white-player" viewBox="0 0 100 100">
+        <p>VS</p>
+
+        <div id="white-info" class="vert">
+            <span id="white-player"></span>
+            <svg class="stone" id="white-stone" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" stroke="black" stroke-width="0.2em" fill="white">
             </svg>
+            <span id="white-count"></span>
         </div>
-        <p id="end" class="center">END!!!</p>
-        <script src="./index.js"></script>
-    </body>
+    </div>
+    <p id="game-result" class="center"></p>
+    <script src="./index.js"></script>
+</body>
+
 </html>
