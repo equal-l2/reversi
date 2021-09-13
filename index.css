@@ -16,8 +16,12 @@ body {
   width: 3em;
 }
 
-.placeable {
+.marked {
   background-color: magenta;
+}
+
+.placed {
+  background-color: cyan;
 }
 
 .center {

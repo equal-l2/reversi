@@ -15,12 +15,15 @@
         <select id="second"></select>
         <button id="new-game">New Game</button>
     </div>
-    <table id="field" style="margin-left:auto;margin-right:auto;"></table>
+    <div style="display:flex">
+        <table id="field" style="margin-left:auto;margin-right:auto;"></table>
+        <select id="log" multiple></select>
+    </div>
     <div id="status" class="center">
         <div id="black-info" class="vert">
             <span id="black-player"></span>
             <svg class="stone" id="black-stone" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" stroke="black" stroke-width="0.2em" fill="black">
+                <circle cx="50" cy="50" r="40" stroke="black" stroke-width="0.2em" fill="black" />
             </svg>
             <span id="black-count"></span>
         </div>

@@ -17,13 +17,14 @@ class AbstractComputer extends AbstractPlayer {
     super(stone, false);
   }
 
-  chooseCell(_cells, _board_json) {
+  chooseCell(_board) {
     throw new Error("Abstract method letPlace is not implemented");
   }
 }
 
 class GreedyComputer extends AbstractComputer {
-  chooseCell(cells, board) {
+  chooseCell(board) {
+    const cells = board.getPlaceable(this.stone);
     // find the cell that yields the most stones
     let most = [0, [0, 0, ""]]; // [<stones>, <cell>]
     for (let cell of cells) {
@@ -40,7 +41,8 @@ class GreedyComputer extends AbstractComputer {
 }
 
 class SmartComputer extends AbstractComputer {
-  chooseCell(cells, board) {
+  chooseCell(board) {
+    const cells = board.getPlaceable(this.stone);
     // select the cell that the opponent will have least choises.
     let least = [Infinity, 0, [0, 0, ""]]; // [<choises>, <my stones>, <cell>]
     for (let cell of cells) {
@@ -57,7 +59,8 @@ class SmartComputer extends AbstractComputer {
 }
 
 class RandomComputer extends AbstractComputer {
-  chooseCell(cells, _board) {
+  chooseCell(board) {
+    const cells = board.getPlaceable(this.stone);
     return cells[Math.trunc(Math.random() * cells.length)];
   }
 }

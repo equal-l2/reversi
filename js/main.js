@@ -1,30 +1,37 @@
 import { flipped, Board } from "./board.js";
 import getPlayerObj, { playerNames } from "./player.js";
 
-const wait = 50; // [ms]
+const wait = 0; // [ms]
 const fieldWidth = 8;
 const fieldHeight = 8;
 
 const players = [null, null, null];
 
-let current = 1;
+let current;
+
+let placed;
+
+const playLog = document.getElementById("log");
+const blackSelect = document.getElementById("first");
+const whiteSelect = document.getElementById("second");
+const field = document.getElementById("field");
+const blackStone = document.getElementById("black-stone");
+const whiteStone = document.getElementById("white-stone");
+const blackCount = document.getElementById("black-count");
+const whiteCount = document.getElementById("white-count");
 
 function showStatus() {
-  const bp = document.getElementById("black-stone");
-  const wp = document.getElementById("white-stone");
-  bp.classList.remove("placeable");
-  wp.classList.remove("placeable");
+  blackStone.classList.remove("marked");
+  whiteStone.classList.remove("marked");
   if (current == 1) {
-    bp.classList.add("placeable");
+    blackStone.classList.add("marked");
   } else if (current === 2) {
-    wp.classList.add("placeable");
+    whiteStone.classList.add("marked");
   }
 
   const counts = board.count();
-  const cnt1 = document.getElementById("black-count");
-  const cnt2 = document.getElementById("white-count");
-  cnt1.innerText = counts[1];
-  cnt2.innerText = counts[2];
+  blackCount.innerText = counts[1];
+  whiteCount.innerText = counts[2];
 }
 
 let board;
@@ -53,8 +60,7 @@ function getStoneSvg(state) {
 }
 
 function populateField() {
-  const field = document.getElementById("field");
-  field.innerHTML = "";
+  field.replaceChildren();
 
   for (let i = 0; i < board.height; i++) {
     const row = field.insertRow();
@@ -63,13 +69,21 @@ function populateField() {
       cell.innerHTML = getStoneSvg(board.read(i, j));
     }
   }
+
+  if (placed[0] != -1) {
+    const [row, col] = placed;
+    field.rows[row].cells[col].classList.add("placed");
+  }
 }
 
 function showResult(show) {
-  const result = document.getElementById("game-result");
+  const gameResult = document.getElementById("game-result");
+  const blackInfo = document.getElementById("black-info");
+  const whiteInfo = document.getElementById("white-info");
+
   if (show) {
-    document.getElementById("black-stone").classList.remove("placeable");
-    document.getElementById("white-stone").classList.remove("placeable");
+    blackStone.classList.remove("marked");
+    whiteStone.classList.remove("marked");
 
     const cnts = board.count();
     let text;
@@ -85,16 +99,16 @@ function showResult(show) {
     } else {
       text = "Error";
     }
-    result.innerText = text;
+    gameResult.innerText = text;
     if (winner === 1) {
-      document.getElementById("black-info").classList.add("placeable");
+      blackInfo.classList.add("marked");
     } else if (winner === 2) {
-      document.getElementById("white-info").classList.add("placeable");
+      whiteInfo.classList.add("marked");
     }
   } else {
-    result.innerText = "";
-    document.getElementById("black-info").classList.remove("placeable");
-    document.getElementById("white-info").classList.remove("placeable");
+    gameResult.innerText = "";
+    blackInfo.classList.remove("marked");
+    whiteInfo.classList.remove("marked");
   }
 }
 
@@ -102,6 +116,7 @@ function nextTurn() {
   current = flipped(current);
   let ps = board.getPlaceable(current);
   if (ps.length === 0) {
+    placed = [-1, -1];
     current = flipped(current);
     ps = board.getPlaceable(current);
     if (ps.length === 0) {
@@ -117,22 +132,42 @@ function nextTurn() {
   if (players[current].isHuman) {
     renderPlaceable(ps);
   } else {
-    const [row, col] = players[current].chooseCell(ps, board);
+    const [row, col] = players[current].chooseCell(board.clone());
     setTimeout(() => clickCell(row, col), wait);
   }
 }
 
+function genLog(row, col, stone) {
+  let stoneStr;
+  switch (stone) {
+    case 1:
+      stoneStr = "Black: ";
+      break;
+    case 2:
+      stoneStr = "White: ";
+      break;
+    default:
+      throw new Error("Unknown stone: " + stone);
+  }
+  const colCode = String.fromCharCode(65 + col);
+  const rowCode = (row + 1).toString();
+  return stoneStr + colCode + rowCode;
+}
+
 function clickCell(row, col) {
+  let opt = document.createElement("option");
+  opt.text = genLog(row, col, current);
+  playLog.add(opt);
   board.placeStone(row, col, current);
+  placed = [row, col];
   nextTurn();
 }
 
 function renderPlaceable(ps) {
-  const field = document.getElementById("field");
   for (const p of ps) {
     const [i, j, _] = p;
     const cell = field.rows[i].cells[j];
-    cell.classList.add("placeable");
+    cell.classList.add("marked");
     //cell.innerHTML = txt;
     cell.onclick = (_) => {
       const rowIdx = cell.closest("tr").rowIndex;
@@ -153,6 +188,9 @@ function initBoard() {
 }
 
 function newGame() {
+  placed = [-1, -1];
+  playLog.replaceChildren();
+
   initBoard();
   initPlayers();
   showResult(false);
@@ -161,10 +199,8 @@ function newGame() {
 }
 
 function initPlayers() {
-  const list1 = document.getElementById("first");
-  const list2 = document.getElementById("second");
-  const chosen1 = list1.options[list1.selectedIndex];
-  const chosen2 = list2.options[list2.selectedIndex];
+  const chosen1 = blackSelect.options[blackSelect.selectedIndex];
+  const chosen2 = whiteSelect.options[whiteSelect.selectedIndex];
   players[1] = getPlayerObj(Number(chosen1.value), 1);
   players[2] = getPlayerObj(Number(chosen2.value), 2);
 
@@ -172,22 +208,18 @@ function initPlayers() {
   document.getElementById("white-player").innerText = chosen2.text;
 }
 
-function generateChooser() {
-  const list1 = document.getElementById("first");
-  const list2 = document.getElementById("second");
+function initPage() {
+  document.getElementById("new-game").onclick = newGame;
 
+  // generate selectors
   for (let i = 0; i < playerNames.length; i++) {
     const option = document.createElement("option");
     option.value = i;
     option.text = playerNames[i];
-    list1.appendChild(option);
-    list2.appendChild(option.cloneNode(true));
+    blackSelect.add(option);
+    whiteSelect.add(option.cloneNode(true));
   }
-}
 
-function initPage() {
-  document.getElementById("new-game").onclick = newGame;
-  generateChooser();
   newGame();
 }
 
