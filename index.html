@@ -3,7 +3,7 @@
 
 <head>
     <title>Reversi</title>
-    <link rel="stylesheet" href="./destyle.css">
+    <link rel="stylesheet" href="./vendor/destyle.css">
     <link rel="stylesheet" href="./index.css">
     <meta charset="utf-8">
 </head>
@@ -13,7 +13,7 @@
         <select id="first"></select>
         VS
         <select id="second"></select>
-        <button onclick="newGame()">New Game</button>
+        <button id="new-game">New Game</button>
     </div>
     <table id="field" style="margin-left:auto;margin-right:auto;"></table>
     <div id="status" class="center">
@@ -36,7 +36,7 @@
         </div>
     </div>
     <p id="game-result" class="center"></p>
-    <script src="./index.js"></script>
+    <script type="module" src="./js/main.js"></script>
 </body>
 
 </html>
