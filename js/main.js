@@ -1,7 +1,6 @@
 import { flipped, Board } from "./board.js";
 import getPlayerObj, { playerNames } from "./player.js";
 
-const wait = 0; // [ms]
 const fieldWidth = 8;
 const fieldHeight = 8;
 
@@ -116,6 +115,8 @@ function nextTurn() {
   current = flipped(current);
   let ps = board.getPlaceable(current);
   if (ps.length === 0) {
+    // no hands, skipped
+    addLog(-1, -1, current, true);
     placed = [-1, -1];
     current = flipped(current);
     ps = board.getPlaceable(current);
@@ -133,30 +134,38 @@ function nextTurn() {
     renderPlaceable(ps);
   } else {
     const [row, col] = players[current].chooseCell(board.clone());
-    setTimeout(() => clickCell(row, col), wait);
+    if (board.canFlipStone(row, col, current)) {
+      setTimeout(() => clickCell(row, col), 0);
+    } else {
+      throw new Error("Invalid hand was chosen: ", row, col);
+    }
   }
 }
 
-function genLog(row, col, stone) {
-  let stoneStr;
-  switch (stone) {
-    case 1:
-      stoneStr = "Black: ";
-      break;
-    case 2:
-      stoneStr = "White: ";
-      break;
-    default:
-      throw new Error("Unknown stone: " + stone);
+function addLog(row, col, stone, skip = false) {
+  function genLog(row, col, stone, skip) {
+    let stoneStr;
+    switch (stone) {
+      case 1:
+        stoneStr = "Black: ";
+        break;
+      case 2:
+        stoneStr = "White: ";
+        break;
+      default:
+        throw new Error("Unknown stone: " + stone);
+    }
+    if (skip) {
+      return stoneStr + "(skipped)";
+    } else {
+      const colCode = String.fromCharCode(65 + col);
+      const rowCode = (row + 1).toString();
+      return stoneStr + colCode + rowCode;
+    }
   }
-  const colCode = String.fromCharCode(65 + col);
-  const rowCode = (row + 1).toString();
-  return stoneStr + colCode + rowCode;
-}
 
-function addLog(row, col, stone) {
   let item = document.createElement("li");
-  item.innerText = genLog(row, col, stone);
+  item.innerText = genLog(row, col, stone, skip);
   playLog.appendChild(item);
   playLog.scrollTop = playLog.scrollHeight;
 }
@@ -184,12 +193,7 @@ function renderPlaceable(ps) {
 
 function initBoard() {
   board = new Board(fieldWidth, fieldHeight);
-  const halfH = Math.trunc(fieldHeight / 2);
-  const halfW = Math.trunc(fieldWidth / 2);
-  board.mutate(halfH - 1, halfW - 1, 1);
-  board.mutate(halfH - 1, halfW, 2);
-  board.mutate(halfH, halfW - 1, 2);
-  board.mutate(halfH, halfW, 1);
+  board.placeCanonicalStones();
 }
 
 function newGame() {

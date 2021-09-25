@@ -50,6 +50,15 @@ class Board {
       });
   }
 
+  placeCanonicalStones() {
+    const halfH = Math.trunc(this.height / 2);
+    const halfW = Math.trunc(this.width / 2);
+    this.mutate(halfH - 1, halfW - 1, 1);
+    this.mutate(halfH - 1, halfW, 2);
+    this.mutate(halfH, halfW - 1, 2);
+    this.mutate(halfH, halfW, 1);
+  }
+
   mutate(row, col, value) {
     this.board[row][col] = validateState(value);
   }
