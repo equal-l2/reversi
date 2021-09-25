@@ -13,6 +13,32 @@ function validateState(state) {
   }
 }
 
+class Dir {
+  static Up = new this(-1, 0);
+  static Down = new this(1, 0);
+  static Left = new this(0, -1);
+  static Right = new this(0, 1);
+  static UpLeft = new this(-1, -1);
+  static UpRight = new this(-1, 1);
+  static DownLeft = new this(1, -1);
+  static DownRight = new this(1, 1);
+  static Dirs = [
+    this.Up,
+    this.Down,
+    this.Left,
+    this.Right,
+    this.UpLeft,
+    this.UpRight,
+    this.DownLeft,
+    this.DownRight,
+  ];
+
+  constructor(row, col) {
+    this.row = row;
+    this.col = col;
+  }
+}
+
 class Board {
   constructor(width, height) {
     this.width = width;
@@ -29,10 +55,7 @@ class Board {
   }
 
   read(row, col) {
-    if (
-      (0 <= row && row < this.height)
-      && (0 <= col && col < this.width)
-    ) {
+    if (0 <= row && row < this.height && 0 <= col && col < this.width) {
       return this.board[row][col];
     } else {
       return null;
@@ -49,118 +72,17 @@ class Board {
     return counts;
   }
 
-  canFlipUp(row, col, myStone) {
+  canFlipTo(row, col, myStone, dir) {
     const oppo = flipped(myStone);
-    let i = row - 1;
-    let j = col;
+    let i = row + dir.row;
+    let j = col + dir.col;
     while (true) {
       if (this.read(i, j) !== oppo) break;
-      if (this.read(i - 1, j) === myStone) {
+      i += dir.row;
+      j += dir.col;
+      if (this.read(i, j) === myStone) {
         return true;
       }
-      i--;
-    }
-    return false;
-  }
-
-  canFlipDown(row, col, myStone) {
-    const oppo = flipped(myStone);
-    let i = row + 1;
-    let j = col;
-    while (true) {
-      if (this.read(i, j) !== oppo) break;
-      if (this.read(i + 1, j) === myStone) {
-        return true;
-      }
-      i++;
-    }
-    return false;
-  }
-
-  canFlipLeft(row, col, myStone) {
-    const oppo = flipped(myStone);
-    let i = row;
-    let j = col - 1;
-    while (true) {
-      if (this.read(i, j) !== oppo) break;
-      if (this.read(i, j - 1) === myStone) {
-        return true;
-      }
-      j--;
-    }
-    return false;
-  }
-
-  canFlipRight(row, col, myStone) {
-    const oppo = flipped(myStone);
-    let i = row;
-    let j = col + 1;
-    while (true) {
-      if (this.read(i, j) !== oppo) break;
-      if (this.read(i, j + 1) === myStone) {
-        return true;
-      }
-      j++;
-    }
-    return false;
-  }
-
-  canFlipUpLeft(row, col, myStone) {
-    const oppo = flipped(myStone);
-    let i = row - 1;
-    let j = col - 1;
-    while (true) {
-      if (this.read(i, j) !== oppo) break;
-      if (this.read(i - 1, j - 1) === myStone) {
-        return true;
-      }
-      i--;
-      j--;
-    }
-    return false;
-  }
-
-  canFlipUpRight(row, col, myStone) {
-    const oppo = flipped(myStone);
-    let i = row - 1;
-    let j = col + 1;
-    while (true) {
-      if (this.read(i, j) !== oppo) break;
-      if (this.read(i - 1, j + 1) === myStone) {
-        return true;
-      }
-      i--;
-      j++;
-    }
-    return false;
-  }
-
-  canFlipDownLeft(row, col, myStone) {
-    const oppo = flipped(myStone);
-    let i = row + 1;
-    let j = col - 1;
-    while (true) {
-      if (this.read(i, j) !== oppo) break;
-      if (this.read(i + 1, j - 1) === myStone) {
-        return true;
-      }
-      i++;
-      j--;
-    }
-    return false;
-  }
-
-  canFlipDownRight(row, col, myStone) {
-    const oppo = flipped(myStone);
-    let i = row + 1;
-    let j = col + 1;
-    while (true) {
-      if (this.read(i, j) !== oppo) break;
-      if (this.read(i + 1, j + 1) === myStone) {
-        return true;
-      }
-      i++;
-      j++;
     }
     return false;
   }
@@ -171,100 +93,36 @@ class Board {
       return "";
     }
 
+    const dirStrs = ["U", "D", "L", "R", "ul", "ur", "dl", "dr"];
+
     let ret = "";
-    if (this.canFlipUp(row, col, myStone)) {
-      ret += "U";
-    }
-    if (this.canFlipDown(row, col, myStone)) {
-      ret += "D";
-    }
-    if (this.canFlipLeft(row, col, myStone)) {
-      ret += "L";
-    }
-    if (this.canFlipRight(row, col, myStone)) {
-      ret += "R";
-    }
-    if (this.canFlipUpLeft(row, col, myStone)) {
-      ret += "ul";
-    }
-    if (this.canFlipUpRight(row, col, myStone)) {
-      ret += "ur";
-    }
-    if (this.canFlipDownLeft(row, col, myStone)) {
-      ret += "dl";
-    }
-    if (this.canFlipDownRight(row, col, myStone)) {
-      ret += "dr";
+    for (let i = 0; i < 8; i++) {
+      if (this.canFlipTo(row, col, myStone, Dir.Dirs[i])) {
+        ret += dirStrs[i];
+      }
     }
     return ret;
   }
 
-  placeStone(row, col, myStone) {
+  flipTo(row, col, myStone, dir) {
     const oppo = flipped(myStone);
+    let i = row + dir.row;
+    let j = col + dir.col;
+    // the initial i and j is always oppo
+    // as it is already checked with canFlipTo
+    do {
+      this.mutate(i, j, myStone);
+      i += dir.row;
+      j += dir.col;
+    } while (this.read(i, j) === oppo);
+  }
+
+  placeStone(row, col, myStone) {
     this.mutate(row, col, myStone);
 
-    if (this.canFlipUp(row, col, myStone)) {
-      let i = row - 1;
-      while (i > 0 && this.read(i, col) === oppo) {
-        this.mutate(i, col, myStone);
-        i--;
-      }
-    }
-    if (this.canFlipDown(row, col, myStone)) {
-      let i = row + 1;
-      while (i < this.height && this.read(i, col) === oppo) {
-        this.mutate(i, col, myStone);
-        i++;
-      }
-    }
-    if (this.canFlipLeft(row, col, myStone)) {
-      let j = col - 1;
-      while (j > 0 && this.read(row, j) === oppo) {
-        this.mutate(row, j, myStone);
-        j--;
-      }
-    }
-    if (this.canFlipRight(row, col, myStone)) {
-      let j = col + 1;
-      while (j < this.width && this.read(row, j) === oppo) {
-        this.mutate(row, j, myStone);
-        j++;
-      }
-    }
-    if (this.canFlipUpLeft(row, col, myStone)) {
-      let i = row - 1;
-      let j = col - 1;
-      while (i > 0 && j > 0 && this.read(i, j) === oppo) {
-        this.mutate(i, j, myStone);
-        i--;
-        j--;
-      }
-    }
-    if (this.canFlipUpRight(row, col, myStone)) {
-      let i = row - 1;
-      let j = col + 1;
-      while (i > 0 && j < this.width && this.read(i, j) === oppo) {
-        this.mutate(i, j, myStone);
-        i--;
-        j++;
-      }
-    }
-    if (this.canFlipDownLeft(row, col, myStone)) {
-      let i = row + 1;
-      let j = col - 1;
-      while (i < this.height && j > 0 && this.read(i, j) === oppo) {
-        this.mutate(i, j, myStone);
-        i++;
-        j--;
-      }
-    }
-    if (this.canFlipDownRight(row, col, myStone)) {
-      let i = row + 1;
-      let j = col + 1;
-      while (i < this.height && j < this.width && this.read(i, j) === oppo) {
-        this.mutate(i, j, myStone);
-        i++;
-        j++;
+    for (let dir of Dir.Dirs) {
+      if (this.canFlipTo(row, col, myStone, dir)) {
+        this.flipTo(row, col, myStone, dir);
       }
     }
   }
