@@ -9,36 +9,34 @@
 </head>
 
 <body>
-    <div id="control" class="center">
-        <select id="first"></select>
-        VS
-        <select id="second"></select>
-        <button id="new-game">New Game</button>
-    </div>
-    <div style="display:flex">
-        <table id="field" style="margin-left:auto;margin-right:auto;"></table>
-        <select id="log" multiple></select>
-    </div>
-    <div id="status" class="center">
-        <div id="black-info" class="vert">
-            <span id="black-player"></span>
-            <svg class="stone" id="black-stone" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" stroke="black" stroke-width="0.2em" fill="black" />
-            </svg>
-            <span id="black-count"></span>
-        </div>
+    <div id="view-container">
+        <div id="game-container">
+            <div id="control" class="flex-center">
+                <select id="first"></select>
+                VS
+                <select id="second"></select>
+                <button id="new-game">New Game</button>
+            </div>
+            <table id="field"></table>
+            <div id="status" class="flex-center">
+                <div id="black-info" class="vert">
+                    <span id="black-player"></span>
+                    <svg class="stone" id="black-stone"></svg>
+                    <span id="black-count"></span>
+                </div>
 
-        <p>VS</p>
+                <p>VS</p>
 
-        <div id="white-info" class="vert">
-            <span id="white-player"></span>
-            <svg class="stone" id="white-stone" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" stroke="black" stroke-width="0.2em" fill="white">
-            </svg>
-            <span id="white-count"></span>
+                <div id="white-info" class="vert">
+                    <span id="white-player"></span>
+                    <svg class="stone" id="white-stone"></svg>
+                    <span id="white-count"></span>
+                </div>
+            </div>
         </div>
+        <ul id="log"></ul>
     </div>
-    <p id="game-result" class="center"></p>
+    <p id="game-result" class="flex-center"></p>
     <script type="module" src="./js/main.js"></script>
 </body>
 

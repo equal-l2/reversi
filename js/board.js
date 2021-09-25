@@ -29,7 +29,14 @@ class Board {
   }
 
   read(row, col) {
-    return this.board[row][col];
+    if (
+      (0 <= row && row < this.height)
+      && (0 <= col && col < this.width)
+    ) {
+      return this.board[row][col];
+    } else {
+      return null;
+    }
   }
 
   count() {
@@ -46,7 +53,7 @@ class Board {
     const oppo = flipped(myStone);
     let i = row - 1;
     let j = col;
-    while (i > 0) {
+    while (true) {
       if (this.read(i, j) !== oppo) break;
       if (this.read(i - 1, j) === myStone) {
         return true;
@@ -60,7 +67,7 @@ class Board {
     const oppo = flipped(myStone);
     let i = row + 1;
     let j = col;
-    while (i < this.height - 1) {
+    while (true) {
       if (this.read(i, j) !== oppo) break;
       if (this.read(i + 1, j) === myStone) {
         return true;
@@ -74,7 +81,7 @@ class Board {
     const oppo = flipped(myStone);
     let i = row;
     let j = col - 1;
-    while (j > 0) {
+    while (true) {
       if (this.read(i, j) !== oppo) break;
       if (this.read(i, j - 1) === myStone) {
         return true;
@@ -88,7 +95,7 @@ class Board {
     const oppo = flipped(myStone);
     let i = row;
     let j = col + 1;
-    while (j < this.width - 1) {
+    while (true) {
       if (this.read(i, j) !== oppo) break;
       if (this.read(i, j + 1) === myStone) {
         return true;
@@ -102,7 +109,7 @@ class Board {
     const oppo = flipped(myStone);
     let i = row - 1;
     let j = col - 1;
-    while (i > 0 && j > 0) {
+    while (true) {
       if (this.read(i, j) !== oppo) break;
       if (this.read(i - 1, j - 1) === myStone) {
         return true;
@@ -117,7 +124,7 @@ class Board {
     const oppo = flipped(myStone);
     let i = row - 1;
     let j = col + 1;
-    while (i > 0 && j < this.width - 1) {
+    while (true) {
       if (this.read(i, j) !== oppo) break;
       if (this.read(i - 1, j + 1) === myStone) {
         return true;
@@ -132,7 +139,7 @@ class Board {
     const oppo = flipped(myStone);
     let i = row + 1;
     let j = col - 1;
-    while (i < this.height - 1 && j > 0) {
+    while (true) {
       if (this.read(i, j) !== oppo) break;
       if (this.read(i + 1, j - 1) === myStone) {
         return true;
@@ -147,7 +154,7 @@ class Board {
     const oppo = flipped(myStone);
     let i = row + 1;
     let j = col + 1;
-    while (i < this.height - 1 && j < this.width - 1) {
+    while (true) {
       if (this.read(i, j) !== oppo) break;
       if (this.read(i + 1, j + 1) === myStone) {
         return true;

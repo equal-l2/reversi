@@ -154,10 +154,15 @@ function genLog(row, col, stone) {
   return stoneStr + colCode + rowCode;
 }
 
+function addLog(row, col, stone) {
+  let item = document.createElement("li");
+  item.innerText = genLog(row, col, stone);
+  playLog.appendChild(item);
+  playLog.scrollTop = playLog.scrollHeight;
+}
+
 function clickCell(row, col) {
-  let opt = document.createElement("option");
-  opt.text = genLog(row, col, current);
-  playLog.add(opt);
+  addLog(row, col, current);
   board.placeStone(row, col, current);
   placed = [row, col];
   nextTurn();
@@ -219,6 +224,10 @@ function initPage() {
     blackSelect.add(option);
     whiteSelect.add(option.cloneNode(true));
   }
+
+  // draw stones
+  document.getElementById("black-stone").innerHTML = getStoneSvg(1);
+  document.getElementById("white-stone").innerHTML = getStoneSvg(2);
 
   newGame();
 }

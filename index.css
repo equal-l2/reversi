@@ -5,6 +5,8 @@ body {
 #field {
   background-color: green;
   border-collapse: collapse;
+  margin-left:auto;
+  margin-right:auto;
 }
 
 #field td {
@@ -24,7 +26,7 @@ body {
   background-color: cyan;
 }
 
-.center {
+.flex-center {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -58,4 +60,29 @@ button {
 
 #status > * {
   margin: 0.2em;
+}
+
+#log {
+  height: 32em;
+  background: lightgray;
+  border: solid 1px;
+  border-radius: 1em;
+  margin: 0.5em;
+  padding: 0.5em;
+  width: 10em;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+#game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: top;
+}
+
+#view-container {
+  display:flex;
+  justify-content:center;
+  align-items: top;
+  gap: 2em;
 }
