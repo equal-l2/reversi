@@ -1,3 +1,5 @@
+import { flipped } from "./board.js";
+
 class AbstractPlayer {
   constructor(stone, isHuman) {
     this.stone = stone;
@@ -6,7 +8,6 @@ class AbstractPlayer {
 }
 
 class Player extends AbstractPlayer {
-  name = "Player";
   constructor(stone) {
     super(stone, true);
   }
@@ -18,22 +19,69 @@ class AbstractComputer extends AbstractPlayer {
   }
 
   chooseCell(_board) {
-    throw new Error("Abstract method letPlace is not implemented");
+    throw new Error("Abstract method chooseCell is not implemented");
   }
+}
+
+const StepsToLook = 1;
+
+function getAllHands(steps, board, stone) {
+  const cells = board.getPlaceable(stone);
+  if (cells.length === 0) {
+    const newSteps = [...steps, [-1, -1]];
+    return [[newSteps, board]];
+  } else {
+    return cells.map((c) => {
+      const b = board.clone();
+      b.placeStone(c[0], c[1], stone);
+      const step = [c[0], c[1]];
+      const newSteps = [...steps, step];
+      return [newSteps, b];
+    });
+  }
+}
+
+function getBoards(orig, stone) {
+  let boards = [[[], orig]];
+  let n = StepsToLook;
+  while (true) {
+    boards = boards
+      .map((b) => {
+        const steps = b[0];
+        const board = b[1];
+        return getAllHands(steps, board, stone);
+      })
+      .flat();
+
+    n -= 1;
+
+    if (n > 0) {
+      // enumerate all hand of the opponent
+      const oppo = flipped(stone);
+      boards = boards
+        .map((b) => {
+          const steps = b[0];
+          const board = b[1];
+          return getAllHands(steps, board, oppo);
+        })
+        .flat();
+    } else {
+      break;
+    }
+  }
+  return boards;
 }
 
 class GreedyComputer extends AbstractComputer {
   chooseCell(board) {
-    const cells = board.getPlaceable(this.stone);
+    const boards = getBoards(board, this.stone);
+
     // find the cell that yields the most stones
-    let most = [0, [0, 0, ""]]; // [<stones>, <cell>]
-    for (let cell of cells) {
-      let board_copy = board.clone();
-      board_copy.placeStone(cell[0], cell[1], this.stone);
-      let count = board_copy.count()[this.stone];
+    let most = [0, [0, 0]]; // [<stones>, <cell>]
+    for (let b of boards) {
+      let count = b[1].count()[this.stone];
       if (count > most[0]) {
-        most[0] = count;
-        most[1] = cell;
+        most = [count, b[0][0]];
       }
     }
     return most[1];
@@ -42,18 +90,18 @@ class GreedyComputer extends AbstractComputer {
 
 class SmartComputer extends AbstractComputer {
   chooseCell(board) {
-    const cells = board.getPlaceable(this.stone);
+    const boards = getBoards(board, this.stone);
     // select the cell that the opponent will have least choises.
-    let least = [Infinity, 0, [0, 0, ""]]; // [<choises>, <my stones>, <cell>]
-    for (let cell of cells) {
-      let board_copy = board.clone();
-      board_copy.placeStone(cell[0], cell[1], this.stone);
-      let choise = board_copy.getPlaceable(this.stone).length;
-      let count = board_copy.count()[this.stone];
-      if (choise <= least[0] && count > least[1]) {
-        least = [choise, count, cell];
+    let least = [Infinity, 0, [0, 0]]; // [<choises>, <my stones>, <cell>]
+
+    for (let b of boards) {
+      let count = b[1].count()[this.stone];
+      let choise = b[1].getPlaceable(this.stone).length;
+      if (choise < least[0] || (choise === least[0] && count > least[1])) {
+        least = [choise, count, b[0][0]];
       }
     }
+
     return least[2];
   }
 }
