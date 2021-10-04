@@ -43,10 +43,10 @@ class Board {
   constructor(width, height) {
     this.width = width;
     this.height = height;
-    this.board = new Array(width)
+    this.board = new Array(height)
       .fill(null) // for map (undefined won't work)
       .map(() => {
-        return new Array(height).fill(0);
+        return new Array(width).fill(0);
       });
   }
 
