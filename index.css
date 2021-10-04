@@ -86,3 +86,7 @@ button {
   align-items: top;
   gap: 2em;
 }
+
+input {
+  border: solid 1px;
+}

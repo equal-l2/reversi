@@ -32,26 +32,44 @@ function runGame(players) {
 }
 
 function runTest() {
-  const selector = document.getElementById("player-choose");
-  const chosen = selector.options[selector.selectedIndex];
-  let players = [null, null, null];
-  players[1] = getPlayerObj(3, 1); // random player
-  players[2] = getPlayerObj(Number(chosen.value), 2);
-  if (players[2].isHuman) {
-    throw new Error("Only non-human players can be tested");
-  }
+  document.getElementById("result").innerText = "Running...";
+  document.getElementById("elapsed").innerText = "";
 
-  let wins = [0, 0];
-  for (let i = 0; i < 1000; i++) {
-    const cnts = runGame(players);
-    if (cnts[1] > cnts[2]) {
-      wins[0]++;
-    } else if (cnts[1] < cnts[2]) {
-      wins[1]++;
+  setTimeout(() => {
+    const selector = document.getElementById("player-choose");
+    const playerChosen = Number.parseInt(
+      selector.options[selector.selectedIndex].value
+    );
+    const colorChosen = Number.parseInt(
+      document.querySelector("input:checked").value
+    );
+    let players = [null, null, null];
+    players[colorChosen] = getPlayerObj(playerChosen, colorChosen);
+    if (players[colorChosen].isHuman) {
+      throw new Error("Only non-human players can be tested");
     }
-  }
+    players[flipped(colorChosen)] = getPlayerObj(3, flipped(colorChosen)); // random player
 
-  document.getElementById("result").innerText = `Random ${wins[0]} / Target ${wins[1]}`;
+    let wins = [0, 0];
+    const iter = Number.parseInt(document.getElementById("iter").value);
+    const start = performance.now();
+    for (let i = 0; i < iter; i++) {
+      const cnts = runGame(players);
+      if (cnts[1] > cnts[2]) {
+        wins[0]++;
+      } else if (cnts[1] < cnts[2]) {
+        wins[1]++;
+      }
+    }
+    const end = performance.now();
+
+    document.getElementById(
+      "result"
+    ).innerText = `${players[1].name} ${wins[0]} / ${players[2].name} ${wins[1]}`;
+    document.getElementById("elapsed").innerText = `Elapsed time: ${
+      end - start
+    } [ms]`;
+  }, 10);
 }
 
 function initPage() {
@@ -59,7 +77,7 @@ function initPage() {
 
   // generate selectors
   const selector = document.getElementById("player-choose");
-  for (let i = 0; i < playerNames.length; i++) {
+  for (let i = 1; i < playerNames.length; i++) {
     const option = document.createElement("option");
     option.value = i;
     option.text = playerNames[i];

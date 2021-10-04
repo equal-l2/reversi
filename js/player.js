@@ -1,21 +1,22 @@
 import { flipped } from "./board.js";
 
 class AbstractPlayer {
-  constructor(stone, isHuman) {
+  constructor(stone, isHuman, name) {
     this.stone = stone;
     this.isHuman = isHuman;
+    this.name = name;
   }
 }
 
 class Player extends AbstractPlayer {
   constructor(stone) {
-    super(stone, true);
+    super(stone, true, "Player");
   }
 }
 
 class AbstractComputer extends AbstractPlayer {
-  constructor(stone) {
-    super(stone, false);
+  constructor(stone, name) {
+    super(stone, false, name);
   }
 
   chooseCell(_board) {
@@ -24,6 +25,10 @@ class AbstractComputer extends AbstractPlayer {
 }
 
 const StepsToLook = 1;
+
+if (StepsToLook <= 0) {
+  throw new Error("StepsToLook must be positive");
+}
 
 function getAllHands(steps, board, stone) {
   const cells = board.getPlaceable(stone);
@@ -73,6 +78,10 @@ function getBoards(orig, stone) {
 }
 
 class GreedyComputer extends AbstractComputer {
+  constructor(stone) {
+    super(stone, "Greedy Computer");
+  }
+
   chooseCell(board) {
     const boards = getBoards(board, this.stone);
 
@@ -89,6 +98,10 @@ class GreedyComputer extends AbstractComputer {
 }
 
 class SmartComputer extends AbstractComputer {
+  constructor(stone) {
+    super(stone, "Smart Computer");
+  }
+
   chooseCell(board) {
     const boards = getBoards(board, this.stone);
     // select the cell that the opponent will have least choises.
@@ -107,6 +120,10 @@ class SmartComputer extends AbstractComputer {
 }
 
 class RandomComputer extends AbstractComputer {
+  constructor(stone) {
+    super(stone, "Random Computer");
+  }
+
   chooseCell(board) {
     const cells = board.getPlaceable(this.stone);
     return cells[Math.trunc(Math.random() * cells.length)];

@@ -10,12 +10,18 @@
 
 <body>
     <div id="view-container">
-        <div id="game-container">
-            <div id="control" class="flex-center">
-                <select id="player-choose"></select>
+        <div id="game-container" style="display:flex;flex-direction:column; align-items:center">
+            <div id="control" style="display:flex;flex-direction:column; align-items:center">
+                <div>Player: <select id="player-choose"></select></div>
+                <div>Color:
+                    <input type="radio" name="color" value="1" checked>Black</input>
+                    <input type="radio" name="color" value="2">White</input>
+                </div>
+                <div>Iterations: <input id="iter" type="number" value="100" style="width:10em"></input></div>
                 <button id="run-button">Run</button>
             </div>
             <p id="result"></p>
+            <p id="elapsed"></p>
         </div>
     </div>
     <script type="module" src="./js/test.js"></script>
