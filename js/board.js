@@ -41,13 +41,23 @@ class Dir {
 
 class Board {
   constructor(width, height) {
+    if (width > 31) {
+      throw new Error("Board width is too large")
+    }
+
     this.width = width;
     this.height = height;
-    this.board = new Array(height)
+    this.blackBoard = new Array(height).fill(0);
+    this.whiteBoard = new Array(height).fill(0);
+
+    /*
+    // for checking integrity of implementation
+    this.oldBoard = new Array(height)
       .fill(null) // for map (undefined won't work)
       .map(() => {
         return new Array(width).fill(0);
       });
+    */
   }
 
   placeCanonicalStones() {
@@ -60,23 +70,71 @@ class Board {
   }
 
   mutate(row, col, value) {
-    this.board[row][col] = validateState(value);
+    switch(value) {
+      case 0: // empty
+        this.blackBoard[row] &= ~(1 << col);
+        this.whiteBoard[row] &= ~(1 << col);
+        break;
+      case 1: // black
+        this.blackBoard[row] |= (1 << col);
+        this.whiteBoard[row] &= ~(1 << col);
+        break;
+      case 2: // white
+        this.blackBoard[row] &= ~(1 << col);
+        this.whiteBoard[row] |= (1 << col);
+        break;
+    }
+
+    /*
+    // checking integrity
+    {
+      this.oldBoard[row][col] = validateState(value);
+      for(let i = 0; i < this.height; i++) {
+        for(let j = 0; j < this.width; j++) {
+          let val = this.read(row, col);
+          if (val !== this.oldBoard[row][col]) {
+            throw new Error("Integrity is broken");
+          }
+        }
+      }
+    }
+    */
   }
 
   read(row, col) {
     if (0 <= row && row < this.height && 0 <= col && col < this.width) {
-      return this.board[row][col];
+      if (this.blackBoard[row] & (1 << col)) {
+        return 1;
+      }
+      else if (this.whiteBoard[row] & (1 << col)) {
+        return 2;
+      } else {
+        return 0;
+      }
     } else {
       return null;
     }
   }
 
+  countOnes(num) {
+    let cnt = 0;
+    let mask = 1;
+    for(let i = 0; i < this.width; i++) {
+      if (num & mask) cnt++;
+      mask <<= 1;
+    }
+    return cnt;
+  }
+
   count() {
     let counts = [0, 0, 0];
-    for (let row of this.board) {
-      for (let val of row) {
-        counts[val] += 1;
-      }
+    for (let i = 0; i < this.height; i++) {
+      const blackCnt = this.countOnes(this.blackBoard[i]);
+      const whiteCnt = this.countOnes(this.whiteBoard[i]);
+      const emptyCnt = this.width - (blackCnt + whiteCnt);
+      counts[0] += emptyCnt;
+      counts[1] += blackCnt;
+      counts[2] += whiteCnt;
     }
     return counts;
   }
@@ -151,9 +209,16 @@ class Board {
 
   clone() {
     let ret = new Board(this.width, this.height);
+    ret.blackBoard = [...this.blackBoard];
+    ret.whiteBoard = [...this.whiteBoard];
+
+    /*
+    // for checking integrity
     for (let i = 0; i < this.height; i++) {
-      ret.board[i] = [...this.board[i]];
+      ret.oldBoard[i] = [...this.oldBoard[i]];
     }
+    */
+ 
     return ret;
   }
 }
