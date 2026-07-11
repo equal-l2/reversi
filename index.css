@@ -5,8 +5,8 @@ body {
 #field {
   background-color: green;
   border-collapse: collapse;
-  margin-left:auto;
-  margin-right:auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #field td {
@@ -81,8 +81,8 @@ button {
 }
 
 #view-container {
-  display:flex;
-  justify-content:center;
+  display: flex;
+  justify-content: center;
   align-items: top;
   gap: 2em;
 }

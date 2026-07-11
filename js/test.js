@@ -37,12 +37,8 @@ function runTest() {
 
   setTimeout(() => {
     const selector = document.getElementById("player-choose");
-    const playerChosen = Number.parseInt(
-      selector.options[selector.selectedIndex].value
-    );
-    const colorChosen = Number.parseInt(
-      document.querySelector("input:checked").value
-    );
+    const playerChosen = Number.parseInt(selector.options[selector.selectedIndex].value);
+    const colorChosen = Number.parseInt(document.querySelector("input:checked").value);
     let players = [null, null, null];
     players[colorChosen] = getPlayerObj(playerChosen, colorChosen);
     if (players[colorChosen].isHuman) {
@@ -63,12 +59,9 @@ function runTest() {
     }
     const end = performance.now();
 
-    document.getElementById(
-      "result"
-    ).innerText = `${players[1].name} ${wins[0]} / ${players[2].name} ${wins[1]}`;
-    document.getElementById("elapsed").innerText = `Elapsed time: ${
-      end - start
-    } [ms]`;
+    document.getElementById("result").innerText =
+      `${players[1].name} ${wins[0]} / ${players[2].name} ${wins[1]}`;
+    document.getElementById("elapsed").innerText = `Elapsed time: ${end - start} [ms]`;
   }, 10);
 }
 

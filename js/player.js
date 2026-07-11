@@ -145,11 +145,6 @@ function getPlayerObj(i, myStone) {
   }
 }
 
-export const playerNames = [
-  "Player",
-  "Greedy Computer",
-  "Smart Computer",
-  "Random Computer",
-];
+export const playerNames = ["Player", "Greedy Computer", "Smart Computer", "Random Computer"];
 
 export default getPlayerObj;

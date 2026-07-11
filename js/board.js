@@ -43,11 +43,7 @@ class Board {
   constructor(width, height) {
     this.width = width;
     this.height = height;
-    this.board = new Array(height)
-      .fill(null) // for map (undefined won't work)
-      .map(() => {
-        return new Array(width).fill(0);
-      });
+    this.board = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
   }
 
   placeCanonicalStones() {
