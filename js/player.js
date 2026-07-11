@@ -24,12 +24,6 @@ class AbstractComputer extends AbstractPlayer {
   }
 }
 
-const StepsToLook = 1;
-
-if (StepsToLook <= 0) {
-  throw new Error("StepsToLook must be positive");
-}
-
 function getAllHands(steps, board, stone) {
   const cells = board.getPlaceable(stone);
   if (cells.length === 0) {
@@ -46,9 +40,9 @@ function getAllHands(steps, board, stone) {
   }
 }
 
-function getBoards(orig, stone) {
+function getBoards(orig, stone, stepsToLook) {
   let boards = [[[], orig]];
-  let n = StepsToLook;
+  let n = stepsToLook;
   while (true) {
     boards = boards
       .map((b) => {
@@ -80,10 +74,11 @@ function getBoards(orig, stone) {
 class GreedyComputer extends AbstractComputer {
   constructor(stone) {
     super(stone, "Greedy Computer");
+    this.stepsToLook = 1; // TODO: multistep inference
   }
 
   chooseCell(board) {
-    const boards = getBoards(board, this.stone);
+    const boards = getBoards(board, this.stone, this.stepsToLook);
 
     // find the cell that yields the most stones
     let most = [0, [0, 0]]; // [<stones>, <cell>]
@@ -100,10 +95,11 @@ class GreedyComputer extends AbstractComputer {
 class SmartComputer extends AbstractComputer {
   constructor(stone) {
     super(stone, "Smart Computer");
+    this.stepsToLook = 1; // TODO: multistep inference
   }
 
   chooseCell(board) {
-    const boards = getBoards(board, this.stone);
+    const boards = getBoards(board, this.stone, this.stepsToLook);
     // select the cell that the opponent will have least choises.
     let least = [Infinity, 0, [0, 0]]; // [<choises>, <my stones>, <cell>]
 
@@ -130,21 +126,16 @@ class RandomComputer extends AbstractComputer {
   }
 }
 
+const playerClasses = [Player, GreedyComputer, SmartComputer, RandomComputer];
+
 function getPlayerObj(i, myStone) {
-  switch (i) {
-    case 0:
-      return new Player(myStone);
-    case 1:
-      return new GreedyComputer(myStone);
-    case 2:
-      return new SmartComputer(myStone);
-    case 3:
-      return new RandomComputer(myStone);
-    default:
-      return null;
+  if (i < 0 || i >= playerClasses.length) {
+    throw new Error("Invalid player identifier");
   }
+
+  return new playerClasses[i](myStone);
 }
 
-export const playerNames = ["Player", "Greedy Computer", "Smart Computer", "Random Computer"];
+export const playerNames = playerClasses.map((c) => c.name);
 
 export default getPlayerObj;

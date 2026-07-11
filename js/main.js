@@ -6,9 +6,9 @@ const fieldHeight = 8;
 
 const players = [null, null, null];
 
-let current;
+let currentStone;
 
-let placed;
+let locationToPlace;
 
 const playLog = document.getElementById("log");
 const blackSelect = document.getElementById("first");
@@ -22,9 +22,9 @@ const whiteCount = document.getElementById("white-count");
 function showStatus() {
   blackStone.classList.remove("marked");
   whiteStone.classList.remove("marked");
-  if (current == 1) {
+  if (currentStone == 1) {
     blackStone.classList.add("marked");
-  } else if (current === 2) {
+  } else if (currentStone === 2) {
     whiteStone.classList.add("marked");
   }
 
@@ -69,8 +69,8 @@ function populateField() {
     }
   }
 
-  if (placed[0] != -1) {
-    const [row, col] = placed;
+  if (locationToPlace[0] != -1) {
+    const [row, col] = locationToPlace;
     field.rows[row].cells[col].classList.add("placed");
   }
 }
@@ -112,29 +112,25 @@ function showResult(show) {
 }
 
 function nextTurn() {
-  current = flipped(current);
-  let ps = board.getPlaceable(current);
+  currentStone = flipped(currentStone);
+  let ps = board.getPlaceable(currentStone);
   if (ps.length === 0) {
     // no hands, skipped
-    addLog(-1, -1, current, true);
-    placed = [-1, -1];
-    current = flipped(current);
-    ps = board.getPlaceable(current);
+    addLog(-1, -1, currentStone, true);
+    locationToPlace = [-1, -1];
+    currentStone = flipped(currentStone);
+    ps = board.getPlaceable(currentStone);
     if (ps.length === 0) {
-      showStatus();
       showResult(true);
-      populateField();
       return;
     }
   }
 
-  showStatus();
-  populateField();
-  if (players[current].isHuman) {
+  if (players[currentStone].isHuman) {
     renderPlaceable(ps);
   } else {
-    const [row, col] = players[current].chooseCell(board.clone());
-    if (board.canFlipStone(row, col, current)) {
+    const [row, col] = players[currentStone].chooseCell(board.clone());
+    if (board.canFlipStone(row, col, currentStone)) {
       setTimeout(() => clickCell(row, col), 0);
     } else {
       throw new Error("Invalid hand was chosen: ", row, col);
@@ -171,10 +167,14 @@ function addLog(row, col, stone, skip = false) {
 }
 
 function clickCell(row, col) {
-  addLog(row, col, current);
-  board.placeStone(row, col, current);
-  placed = [row, col];
-  nextTurn();
+  addLog(row, col, currentStone);
+  board.placeStone(row, col, currentStone);
+  locationToPlace = [row, col];
+  showStatus();
+  populateField();
+  setTimeout(() => {
+    nextTurn();
+  }, 500);
 }
 
 function renderPlaceable(ps) {
@@ -197,13 +197,15 @@ function initBoard() {
 }
 
 function newGame() {
-  placed = [-1, -1];
+  locationToPlace = [-1, -1];
   playLog.replaceChildren();
 
   initBoard();
   initPlayers();
   showResult(false);
-  current = 0;
+  currentStone = 0;
+  showStatus();
+  populateField();
   nextTurn();
 }
 
