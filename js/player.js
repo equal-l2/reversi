@@ -1,4 +1,4 @@
-import { flipped } from "./board.js";
+import { findLeastChoiseCell, findMostProfitableCell } from "./strategy.js";
 
 class AbstractPlayer {
   constructor(stone, isHuman, name) {
@@ -24,53 +24,6 @@ class AbstractComputer extends AbstractPlayer {
   }
 }
 
-function getAllHands(steps, board, stone) {
-  const cells = board.getPlaceable(stone);
-  if (cells.length === 0) {
-    const newSteps = [...steps, [-1, -1]];
-    return [[newSteps, board]];
-  } else {
-    return cells.map((c) => {
-      const b = board.clone();
-      b.placeStone(c[0], c[1], stone);
-      const step = [c[0], c[1]];
-      const newSteps = [...steps, step];
-      return [newSteps, b];
-    });
-  }
-}
-
-function getBoards(orig, stone, stepsToLook) {
-  let boards = [[[], orig]];
-  let n = stepsToLook;
-  while (true) {
-    boards = boards
-      .map((b) => {
-        const steps = b[0];
-        const board = b[1];
-        return getAllHands(steps, board, stone);
-      })
-      .flat();
-
-    n -= 1;
-
-    if (n > 0) {
-      // enumerate all hand of the opponent
-      const oppo = flipped(stone);
-      boards = boards
-        .map((b) => {
-          const steps = b[0];
-          const board = b[1];
-          return getAllHands(steps, board, oppo);
-        })
-        .flat();
-    } else {
-      break;
-    }
-  }
-  return boards;
-}
-
 class GreedyComputer extends AbstractComputer {
   constructor(stone) {
     super(stone, "Greedy Computer");
@@ -78,17 +31,7 @@ class GreedyComputer extends AbstractComputer {
   }
 
   chooseCell(board) {
-    const boards = getBoards(board, this.stone, this.stepsToLook);
-
-    // find the cell that yields the most stones
-    let most = [0, [0, 0]]; // [<stones>, <cell>]
-    for (let b of boards) {
-      let count = b[1].count()[this.stone];
-      if (count > most[0]) {
-        most = [count, b[0][0]];
-      }
-    }
-    return most[1];
+    return findMostProfitableCell(board, this.stone, this.stepsToLook);
   }
 }
 
@@ -99,19 +42,32 @@ class SmartComputer extends AbstractComputer {
   }
 
   chooseCell(board) {
-    const boards = getBoards(board, this.stone, this.stepsToLook);
-    // select the cell that the opponent will have least choises.
-    let least = [Infinity, 0, [0, 0]]; // [<choises>, <my stones>, <cell>]
+    return findLeastChoiseCell(board, this.stone, this.stepsToLook);
+  }
+}
 
-    for (let b of boards) {
-      let count = b[1].count()[this.stone];
-      let choise = b[1].getPlaceable(this.stone).length;
-      if (choise < least[0] || (choise === least[0] && count > least[1])) {
-        least = [choise, count, b[0][0]];
+class KadoComputer extends AbstractComputer {
+  constructor(stone) {
+    super(stone, "Kado Computer");
+    this.stepsToLook = 1; // TODO: multistep inference
+  }
+
+  chooseCell(board) {
+    const cells = board.getPlaceable(this.stone);
+
+    // Choose Kado if possible
+    for (const cell of cells) {
+      for (const loc of board.getKados()) {
+        if (cell[0] == loc[0] && cell[1] == loc[1]) {
+          return cell;
+        }
       }
     }
 
-    return least[2];
+    // TODO: Avoid around open Kado
+    // TODO: Consider edge
+
+    return findMostProfitableCell(board, this.stone, this.stepsToLook);
   }
 }
 
@@ -126,7 +82,7 @@ class RandomComputer extends AbstractComputer {
   }
 }
 
-const playerClasses = [Player, GreedyComputer, SmartComputer, RandomComputer];
+const playerClasses = [Player, GreedyComputer, SmartComputer, KadoComputer, RandomComputer];
 
 function getPlayerObj(i, myStone) {
   if (i < 0 || i >= playerClasses.length) {

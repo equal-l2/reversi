@@ -46,6 +46,15 @@ class Board {
     this.board = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
   }
 
+  getKados() {
+    return [
+      [0, 0],
+      [0, this.height],
+      [this.width, 0],
+      [this.width, this.height],
+    ];
+  }
+
   placeCanonicalStones() {
     const halfH = Math.trunc(this.height / 2);
     const halfW = Math.trunc(this.width / 2);

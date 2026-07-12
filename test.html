@@ -12,18 +12,17 @@
       <div id="game-container" style="display: flex; flex-direction: column; align-items: center">
         <div id="control" style="display: flex; flex-direction: column; align-items: center">
           <div>
-            Player:
-            <select id="player-choose"></select>
+            Player 1 (Black):
+            <select id="player1-choose"></select>
           </div>
           <div>
-            Color:
-            <label><input type="radio" name="color" value="1" checked />Black</label>
-            <label><input type="radio" name="color" value="2" />White</label>
+            Player 2 (White):
+            <select id="player2-choose"></select>
           </div>
           <div>Iterations: <input id="iter" type="number" value="100" style="width: 10em" /></div>
           <button id="run-button">Run</button>
         </div>
-        <p id="result"></p>
+        <p id="result" style="text-align: center;padding-bottom: 5px;"></p>
         <p id="elapsed"></p>
       </div>
     </div>
