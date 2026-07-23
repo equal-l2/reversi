@@ -1,4 +1,3 @@
-
 import { flipped } from "./board.js";
 
 export function getAllHands(steps, board, stone) {
@@ -49,32 +48,31 @@ export function getBoards(orig, stone, stepsToLook) {
 }
 
 export function findMostProfitableCell(board, stone, stepsToLook) {
-    const boards = getBoards(board, stone, stepsToLook);
+  const boards = getBoards(board, stone, stepsToLook);
 
-    // find the cell that yields the most stones
-    let most = [0, [0, 0]]; // [<stones>, <cell>]
-    for (let b of boards) {
-      let count = b[1].count()[stone];
-      if (count > most[0]) {
-        most = [count, b[0][0]];
-      }
+  // find the cell that yields the most stones
+  let most = [0, [0, 0]]; // [<stones>, <cell>]
+  for (let b of boards) {
+    let count = b[1].count()[stone];
+    if (count > most[0]) {
+      most = [count, b[0][0]];
     }
-    return most[1];
+  }
+  return most[1];
 }
 
 export function findLeastChoiseCell(board, stone, stepsToLook) {
-    const boards = getBoards(board, stone, stepsToLook);
-    // select the cell that the opponent will have least choises.
-    let least = [Infinity, 0, [0, 0]]; // [<choises>, <my stones>, <cell>]
+  const boards = getBoards(board, stone, stepsToLook);
+  // select the cell that the opponent will have least choises.
+  let least = [Infinity, 0, [0, 0]]; // [<choises>, <my stones>, <cell>]
 
-    for (let b of boards) {
-      let count = b[1].count()[stone];
-      let choise = b[1].getPlaceable(stone).length;
-      if (choise < least[0] || (choise === least[0] && count > least[1])) {
-        least = [choise, count, b[0][0]];
-      }
+  for (let b of boards) {
+    let count = b[1].count()[stone];
+    let choise = b[1].getPlaceable(stone).length;
+    if (choise < least[0] || (choise === least[0] && count > least[1])) {
+      least = [choise, count, b[0][0]];
     }
+  }
 
-    return least[2];
+  return least[2];
 }
-

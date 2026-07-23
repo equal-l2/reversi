@@ -60,11 +60,10 @@ function runTest() {
     }
     const end = performance.now();
 
-    const line1 = `${players[1].name} ${wins[0]} / ${players[2].name} ${wins[1]}`
-    const line2 = `(${Math.trunc(100 * wins[0]/iter)}% / ${Math.trunc(100 * wins[1]/iter)}%)`
+    const line1 = `${players[1].name} ${wins[0]} / ${players[2].name} ${wins[1]}`;
+    const line2 = `(${Math.trunc((100 * wins[0]) / iter)}% / ${Math.trunc((100 * wins[1]) / iter)}%)`;
 
-    document.getElementById("result").innerText =
-      `${line1}\n${line2}`;
+    document.getElementById("result").innerText = `${line1}\n${line2}`;
     document.getElementById("elapsed").innerText = `Elapsed time: ${end - start} [ms]`;
   }, 10);
 }
